@@ -14,16 +14,21 @@ jobs:
       - name: Clonar el repositorio
         uses: actions/checkout@v3
 
-      - name: 🛠️ Instalar dependencias
+      - name: Instalar dependencias
         run: |
           npm install
+          npm install --save-dev @types/aws-serverless-express
           npm run build
 
-      - name: Empaquetar código en ZIP
+      - name: Empaquetar función para Lambda
         run: |
           mkdir -p dist
-          cp -r dist/ node_modules/ package.json .env src/lambda.js ./dist/
-          cd dist && zip -r ../lambda.zip .
+          cp package.json dist/
+          cp -r node_modules dist/
+          cp dist/src/lambda.js dist/
+          echo "PORT=4000" > dist/.env
+          cd dist
+          zip -r ../lambda.zip .
 
       - name: Desplegar en Lambda
         uses: appleboy/lambda-action@v0.2.0

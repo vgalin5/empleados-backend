@@ -6,7 +6,6 @@ export class AccessRequestService {
   private repo = new AccessRequestRepository();
   private userRepo = new UserRepository(); // Usamos esto para obtener el rol del usuario
 
-  // Mapa de roles y accesos permitidos
   private roleAccessMap: Record<string, string[]> = {
     "Backend Developer": ["GitHub", "Jira", "AWS"],
     "Frontend Developer": ["GitHub", "Jira"],
