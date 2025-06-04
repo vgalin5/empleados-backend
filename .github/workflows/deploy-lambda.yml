@@ -1,0 +1,35 @@
+name: Deploy to AWS Lambda
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build and Deploy Lambda
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar el repositorio
+        uses: actions/checkout@v3
+
+      - name: 🛠️ Instalar dependencias
+        run: |
+          npm install
+          npm run build
+
+      - name: Empaquetar código en ZIP
+        run: |
+          mkdir -p dist
+          cp -r dist/ node_modules/ package.json .env src/lambda.js ./dist/
+          cd dist && zip -r ../lambda.zip .
+
+      - name: Desplegar en Lambda
+        uses: appleboy/lambda-action@v0.2.0
+        with:
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: ${{ secrets.AWS_REGION }}
+          function_name: ${{ secrets.LAMBDA_FUNCTION_NAME }}
+          zip_file: lambda.zip
