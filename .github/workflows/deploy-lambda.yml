@@ -23,14 +23,14 @@ jobs:
       - name: Empaquetar función para Lambda
         run: |
           mkdir -p dist
+          cp dist/lambda.js dist/ # Copia lambda compilado
           cp package.json dist/
           cp -r node_modules dist/
-          cp dist/src/lambda.js dist/
           echo "PORT=4000" > dist/.env
           cd dist
           zip -r ../lambda.zip .
 
-      - name: Desplegar en Lambda
+      - name: 🚀 Desplegar en AWS Lambda
         uses: appleboy/lambda-action@v0.2.0
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
