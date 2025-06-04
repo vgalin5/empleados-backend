@@ -1,0 +1,31 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar código del repositorio
+        uses: actions/checkout@v3
+
+      - name: 🗝️ Crear archivo PEM para SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PEM_KEY }}" > ~/.ssh/key.pem
+          chmod 400 ~/.ssh/key.pem
+
+      - name: 🚀 Conectarse por SSH y desplegar
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
+            cd empleados-backend || exit 1
+            git pull origin main
+            echo "DB_URL='${{ secrets.DB_URL }}'" > .env
+            npm install
+            npx pm2 stop backend || true
+            npx pm2 start src/index.js --name backend
+          EOF
