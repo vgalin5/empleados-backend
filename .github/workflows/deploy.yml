@@ -13,15 +13,26 @@ jobs:
       - name: Clonar código del repositorio
         uses: actions/checkout@v3
 
-      - name: Crear archivo PEM para SSH
+      - name: 🗝️ Crear archivo PEM para SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.PEM_KEY }}" > ~/.ssh/key.pem
           chmod 400 ~/.ssh/key.pem
 
-      - name: Conectarse por SSH y desplegar
+      - name: 🚀 Conectarse por SSH y desplegar
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            # Instalar Node.js (v18 LTS) si no existe
+            if ! command -v node >/dev/null 2>&1; then
+              curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+              sudo apt-get install -y nodejs
+            fi
+
+            # Instalar pm2 si no existe
+            if ! command -v pm2 >/dev/null 2>&1; then
+              sudo npm install -g pm2
+            fi
+
             # Clonar repo si no existe
             if [ ! -d empleados-backend ]; then
               git clone https://github.com/vgalin5/empleados-backend.git
@@ -32,14 +43,11 @@ jobs:
             # Obtener últimos cambios
             git pull origin main
 
-            # Crear archivo de variables de entorno
+            # Crear archivo de entorno
             echo "DB_URL='${{ secrets.DB_URL }}'" > .env
 
             # Instalar dependencias
             npm install
-
-            # Instalar pm2 global si no está
-            command -v pm2 >/dev/null 2>&1 || npm install -g pm2
 
             # Reiniciar backend
             pm2 stop backend || true
