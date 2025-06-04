@@ -23,7 +23,6 @@ jobs:
       - name: Empaquetar función para Lambda
         run: |
           mkdir -p dist
-          cp dist/lambda.js dist/ # Copia lambda compilado
           cp package.json dist/
           cp -r node_modules dist/
           echo "PORT=4000" > dist/.env
