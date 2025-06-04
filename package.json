@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.149",
+    "@types/aws-serverless-express": "^3.3.10",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",
     "@types/node": "^22.15.29",
