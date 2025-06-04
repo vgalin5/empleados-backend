@@ -13,43 +13,29 @@ jobs:
       - name: Clonar código del repositorio
         uses: actions/checkout@v3
 
-      - name: 🗝️ Crear archivo PEM para SSH
+      - name: Crear archivo PEM para SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.PEM_KEY }}" > ~/.ssh/key.pem
           chmod 400 ~/.ssh/key.pem
 
-      - name: 🚀 Conectarse por SSH y desplegar
+      - name: Conectarse por SSH y desplegar
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # Instalar Node.js (v18 LTS) si no existe
-            if ! command -v node >/dev/null 2>&1; then
-              curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-              sudo apt-get install -y nodejs
-            fi
+            # Entrar o clonar proyecto
+            cd empleados-backend || git clone https://github.com/vgalin5/empleados-backend.git && cd empleados-backend
 
-            # Instalar pm2 si no existe
-            if ! command -v pm2 >/dev/null 2>&1; then
-              sudo npm install -g pm2
-            fi
-
-            # Clonar repo si no existe
-            if [ ! -d empleados-backend ]; then
-              git clone https://github.com/vgalin5/empleados-backend.git
-            fi
-
-            cd empleados-backend
-
-            # Obtener últimos cambios
+            # Pull del código
             git pull origin main
 
-            # Crear archivo de entorno
+            # Crear archivo .env
             echo "DB_URL='${{ secrets.DB_URL }}'" > .env
 
-            # Instalar dependencias
+            # Instalar dependencias y compilar
             npm install
+            npx tsc
 
-            # Reiniciar backend
-            pm2 stop backend || true
-            pm2 start src/index.js --name backend
+            # Ejecutar con PM2
+            npx pm2 stop backend || true
+            npx pm2 start dist/index.js --name backend
           EOF
