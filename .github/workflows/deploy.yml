@@ -22,20 +22,18 @@ jobs:
       - name: Conectarse por SSH y desplegar
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # Entrar o clonar proyecto
-            cd empleados-backend || git clone https://github.com/vgalin5/empleados-backend.git && cd empleados-backend
+            # Clonamos si no existe
+            if [ ! -d "empleados-backend" ]; then
+              git clone https://github.com/vgalin5/empleados-backend.git
+            fi
+            cd empleados-backend
 
-            # Pull del código
             git pull origin main
-
-            # Crear archivo .env
             echo "DB_URL='${{ secrets.DB_URL }}'" > .env
 
-            # Instalar dependencias y compilar
             npm install
-            npx tsc
 
-            # Ejecutar con PM2
+            # Arrancamos con el script de desarrollo usando pm2
             npx pm2 stop backend || true
-            npx pm2 start dist/index.js --name backend
+            npx pm2 start npm --name backend -- run dev
           EOF
