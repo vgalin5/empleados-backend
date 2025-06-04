@@ -1,0 +1,28 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Build
+dist/
+build/
+
+# Environment variables
+.env
+
+# OS files
+.DS_Store
+
+# Editor config
+.vscode/
+.idea/
+*.suo
+*.njsproj
+*.sln
+*.sw?
+
+# Coverage (si haces tests)
+coverage/
